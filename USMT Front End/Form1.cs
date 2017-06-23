@@ -74,7 +74,7 @@ namespace WindowsFormsApplication1
                     Users.Items.Add(dir.Name);
                 }
                 Users.Refresh();
-                Directions.Text = "You have selected a directory to store a profile. \r\n\r\n" +
+                Directions.Text = "You have selected a directory that does not contain a \r\n USMT folder with data inside. \r\n\r\n" +
                     "Step 2: Select the user to migrate from the list on the left";
              
 
@@ -87,7 +87,7 @@ namespace WindowsFormsApplication1
         private void Users_SelectedIndexChanged(object sender, EventArgs e)
         {
             
-            string commandstring = @Directory.GetCurrentDirectory() + "\\" + "scanstate.exe " + StoreLocation.SelectedPath + @" /ue:*\* /ui:fas\" + Users.SelectedItem + @" /i:miguser.xml /i:migapp.xml /o";
+            string commandstring = USMTFolder.SelectedPath + "\\" + "scanstate.exe " + StoreLocation.SelectedPath + @" /ue:*\* /ui:fas\" + Users.SelectedItem + @" /i:miguser.xml /i:migapp.xml  /o /v:1";
             Command.Text =  commandstring;
             Directions.Text = "Step 3: Click Execute to store the user's profile";
 
@@ -98,23 +98,66 @@ namespace WindowsFormsApplication1
             //MessageBox.Show(Directory.GetCurrentDirectory());
             //System.Diagnostics.Process.Start( Command.Text);
             System.Diagnostics.Process process = new System.Diagnostics.Process();
-            process.StartInfo.WorkingDirectory = Directory.GetCurrentDirectory();
+            process.EnableRaisingEvents = true;
+            //process.StartInfo.WorkingDirectory = Directory.GetCurrentDirectory();
             if (StoreProfile.Checked == true)
             {
+                process.Exited += new EventHandler(scanstate_Exited);
+                process.StartInfo.WorkingDirectory = USMTFolder.SelectedPath;
                 process.StartInfo.FileName = "scanstate.exe";
-                process.StartInfo.Arguments = StoreLocation.SelectedPath + @" /ue:*\* /ui:fas\" + Users.SelectedItem + @" /i:miguser.xml /i:migapp.xml /o";
-                process.Start();
+                process.StartInfo.Arguments = StoreLocation.SelectedPath + @" /ue:*\* /ui:" + Domain.Text.ToString() + @"\" + Users.SelectedItem + @" /i:miguser.xml /i:migapp.xml  /o /v:1";
+                //process.Start();
 
             }
             else if (LoadProfile.Checked == true)
             {
+                process.Exited += new EventHandler(loadstate_Exited);
+                process.StartInfo.WorkingDirectory = USMTFolder.SelectedPath;
                 process.StartInfo.FileName = "loadstate";
                 process.StartInfo.Arguments = StoreLocation.SelectedPath + @" /i:miguser.xml /i:migapp.xml";
-                process.Start();
+                //process.Start();
             } else
             {
                 MessageBox.Show("Please don't click this button, yet.");
             }
+            try
+            {
+                process.Start();
+                process.WaitForExit();
+            }
+            catch(Exception exc)
+            {
+                MessageBox.Show(exc.Message + "\n" + "Is this application in the same folder as the USMT files or did you set the USMT Folder location?");
+            }
+            
         }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+
+        }
+
+        private void SetUSMTLocation_Click(object sender, EventArgs e)
+        {
+            USMTFolder.SelectedPath = Directory.GetCurrentDirectory();
+            USMTFolder.ShowDialog();
+            USMTFolderPath.Text = USMTFolder.SelectedPath;
+            
+        }
+
+        private void scanstate_Exited(object sender, System.EventArgs e)
+        {
+            MessageBox.Show("Scanstate completed.");
+            System.Diagnostics.Process.Start(USMTFolder.SelectedPath + "\\scanstate.log");
+
+        }
+
+        private void loadstate_Exited(object sender, System.EventArgs e)
+        {
+            MessageBox.Show("Loadstate completed.");
+            System.Diagnostics.Process.Start(USMTFolder.SelectedPath + "\\loadstate.log");
+
+        }
+
     }
 }
