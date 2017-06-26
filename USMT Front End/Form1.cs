@@ -44,27 +44,20 @@ namespace WindowsFormsApplication1
         private void SetStoreFolder_Click(object sender, EventArgs e)
         {
             StoreLocation.ShowDialog();
-            DirectoryInfo di = new DirectoryInfo(StoreLocation.SelectedPath + "\\USMT");
-
-            if (di.Exists)
+            if(StoreProfile.Checked == true)
             {
-                LoadProfile.Checked = true;
-                string CommandString = @"loadstate " + StoreLocation.SelectedPath + @" /i:miguser.xml /i:migapp.xml";
-                Command.Text = CommandString;
-                Directions.Text = "You have chosen a folder which contains a profile.\r\n" +
-                    "This tool will restore the contained profile to this computer.\r\n\r\n" +
-                    "Step 2: Click Execute to run the loadstate command";
-
-
-            }
-            else
-            {
-                StoreProfile.Checked = true;
-                string UserProfile = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
-                if(UserProfile.Contains(@"C:\Documents and Settings")) {
+                FileInfo di = new FileInfo(StoreLocation.SelectedPath + "\\USMT.MIG");
+                if (di.Exists)
+                {
+                    MessageBox.Show("This folder already contains a USMT.MIG store and it will be replaced.");
+                }
+                    string UserProfile = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+                if (UserProfile.Contains(@"C:\Documents and Settings"))
+                {
                     ProfilesDirectory = "c:\\documents and settings";
                 }
-                else if (UserProfile.Contains(@"C:\Users")) {
+                else if (UserProfile.Contains(@"C:\Users"))
+                {
                     ProfilesDirectory = "C:\\Users";
                 }
                 DirectoryInfo ProfilesDir = new DirectoryInfo(ProfilesDirectory);
@@ -74,22 +67,50 @@ namespace WindowsFormsApplication1
                     Users.Items.Add(dir.Name);
                 }
                 Users.Refresh();
-                Directions.Text = "You have selected a directory that does not contain a \r\n USMT folder with data inside. \r\n\r\n" +
-                    "Step 2: Select the user to migrate from the list on the left";
-             
+
+                StoreFolderTextBox.Text = StoreLocation.SelectedPath;
+
+                string commandstring = USMTFolder.SelectedPath + "\\" + "scanstate.exe " + StoreLocation.SelectedPath;
+                Command.Text = commandstring;
+                UsersLabel.Visible = true;
+                Users.Visible = true;
+                Step4Label.Text = "Step 4. Select the users to migrate.";
+                Step4Label.Visible = true;
 
             }
+            else if (LoadProfile.Checked == true)
+            {
+                FileInfo di = new FileInfo(StoreLocation.SelectedPath + "\\USMT.MIG");
+                if (di.Exists)
+                {
+                    Step4Label.Text = "Step 4. Click the Execute button to run the loadstate command.";
+                    string commandstring = USMTFolder.SelectedPath + "\\" + "loadstate.exe " + StoreLocation.SelectedPath + @" /i:miguser.xml /i:migapp.xml";
+                    Command.Text = commandstring;
+                    Execute.Enabled = true;
+                }
+                else
+                {
+                    MessageBox.Show("The selected folder does not contain the USMT.MIG file.");
+                }
 
-            StoreFolderTextBox.Text = StoreLocation.SelectedPath;
-          
-        }
+            } 
+
+        }          
 
         private void Users_SelectedIndexChanged(object sender, EventArgs e)
         {
+            string usersString = "";
             
-            string commandstring = USMTFolder.SelectedPath + "\\" + "scanstate.exe " + StoreLocation.SelectedPath + @" /ue:*\* /ui:fas\" + Users.SelectedItem + @" /i:miguser.xml /i:migapp.xml  /o /v:1";
+            foreach(var user in Users.SelectedItems ) 
+                {
+                
+                //MessageBox.Show(user.ToString());
+                usersString += @" /ui:" + Domain.Text + @"\" + user.ToString();
+                } 
+            string commandstring = USMTFolder.SelectedPath + "\\" + "scanstate.exe " + StoreLocation.SelectedPath + @" /ue:*\* " + usersString + @" /i:miguser.xml /i:migapp.xml  /o /v:1";
             Command.Text =  commandstring;
-            Directions.Text = "Step 3: Click Execute to store the user's profile";
+            Step5Label.Visible = true;
+            Execute.Enabled = true;
 
         }
 
@@ -105,7 +126,13 @@ namespace WindowsFormsApplication1
                 process.Exited += new EventHandler(scanstate_Exited);
                 process.StartInfo.WorkingDirectory = USMTFolder.SelectedPath;
                 process.StartInfo.FileName = "scanstate.exe";
-                process.StartInfo.Arguments = StoreLocation.SelectedPath + @" /ue:*\* /ui:" + Domain.Text.ToString() + @"\" + Users.SelectedItem + @" /i:miguser.xml /i:migapp.xml  /o /v:1";
+                string usersString = "";
+                foreach (var user in Users.SelectedItems)
+                {
+                    usersString += @" /ui:" + Domain.Text + @"\" + user.ToString();
+                }
+
+                process.StartInfo.Arguments = StoreLocation.SelectedPath + @" /ue:*\* " + usersString + @" /i:miguser.xml /i:migapp.xml  /o /v:1";
                 //process.Start();
 
             }
@@ -134,15 +161,36 @@ namespace WindowsFormsApplication1
 
         private void Form1_Load(object sender, EventArgs e)
         {
+            USMTFolder.SelectedPath = Directory.GetCurrentDirectory();
+            FileInfo di = new FileInfo(USMTFolder.SelectedPath + "\\scanstate.exe ");
 
+            if (di.Exists)
+            {
+                USMTFolderPath.Text = USMTFolder.SelectedPath;
+                StoreProfile.Enabled = true;
+                LoadProfile.Enabled = true;
+            }
         }
 
         private void SetUSMTLocation_Click(object sender, EventArgs e)
         {
             USMTFolder.SelectedPath = Directory.GetCurrentDirectory();
             USMTFolder.ShowDialog();
-            USMTFolderPath.Text = USMTFolder.SelectedPath;
+            FileInfo di = new FileInfo(USMTFolder.SelectedPath + "\\scanstate.exe ");
             
+
+            if (di.Exists)
+            {
+                USMTFolderPath.Text = USMTFolder.SelectedPath;
+                StoreProfile.Enabled = true;
+                LoadProfile.Enabled = true;
+            } else
+            {
+                MessageBox.Show("The selected folder does not contain the USMT tools.");
+            }
+            
+            Command.Text = USMTFolder.SelectedPath + "\\";
+
         }
 
         private void scanstate_Exited(object sender, System.EventArgs e)
@@ -159,5 +207,18 @@ namespace WindowsFormsApplication1
 
         }
 
+        private void StoreProfile_CheckedChanged(object sender, EventArgs e)
+        {
+            SetStoreFolder.Enabled = true;
+            Step3Label.Text = "Step 3. Set the folder to save the profile.";
+            Command.Text = USMTFolder.SelectedPath + "\\scanstate.exe ";
+        }
+
+        private void LoadProfile_CheckedChanged(object sender, EventArgs e)
+        {
+            SetStoreFolder.Enabled = true;
+            Step3Label.Text = "Step 3. Set the folder to the location of the MIG File.";
+            Command.Text = USMTFolder.SelectedPath + "\\loadstate.exe ";
+        }
     }
 }
