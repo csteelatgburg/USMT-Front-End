@@ -83,14 +83,16 @@ namespace WindowsFormsApplication1
                 FileInfo di = new FileInfo(StoreLocation.SelectedPath + "\\USMT.MIG");
                 if (di.Exists)
                 {
+                    StoreFolderTextBox.Text = StoreLocation.SelectedPath;
                     Step4Label.Text = "Step 4. Click the Execute button to run the loadstate command.";
+                    StoreLocation.SelectedPath = StoreLocation.SelectedPath.Replace("\\USMT", "");
                     string commandstring = USMTFolder.SelectedPath + "\\" + "loadstate.exe " + StoreLocation.SelectedPath + @" /i:miguser.xml /i:migapp.xml";
                     Command.Text = commandstring;
                     Execute.Enabled = true;
                 }
                 else
                 {
-                    MessageBox.Show("The selected folder does not contain the USMT.MIG file.");
+                    MessageBox.Show("The selected folder does not contain the USMT folder and USMT.MIG file.");
                 }
 
             } 
@@ -217,7 +219,7 @@ namespace WindowsFormsApplication1
         private void LoadProfile_CheckedChanged(object sender, EventArgs e)
         {
             SetStoreFolder.Enabled = true;
-            Step3Label.Text = "Step 3. Set the folder to the location of the MIG File.";
+            Step3Label.Text = "Step 3. Set the folder to the location of the USMT.MIG.";
             Command.Text = USMTFolder.SelectedPath + "\\loadstate.exe ";
         }
     }
