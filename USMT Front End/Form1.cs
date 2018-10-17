@@ -118,6 +118,7 @@ namespace WindowsFormsApplication1
 
         private void Execute_Click(object sender, EventArgs e)
         {
+            
             //MessageBox.Show(Directory.GetCurrentDirectory());
             //System.Diagnostics.Process.Start( Command.Text);
             System.Diagnostics.Process process = new System.Diagnostics.Process();
@@ -134,7 +135,7 @@ namespace WindowsFormsApplication1
                     usersString += @" /ui:" + Domain.Text + @"\" + user.ToString();
                 }
 
-                process.StartInfo.Arguments = StoreLocation.SelectedPath + @" /ue:*\* " + usersString + @" /i:miguser.xml /i:migapp.xml  /o /v:1";
+                process.StartInfo.Arguments = StoreLocation.SelectedPath + @" /ue:*\* " + usersString + @" /i:miguser.xml /i:migapp.xml  /o /v:1 " + addCLM.Text;
                 //process.Start();
 
             }
@@ -143,7 +144,7 @@ namespace WindowsFormsApplication1
                 process.Exited += new EventHandler(loadstate_Exited);
                 process.StartInfo.WorkingDirectory = USMTFolder.SelectedPath;
                 process.StartInfo.FileName = "loadstate";
-                process.StartInfo.Arguments = StoreLocation.SelectedPath + @" /i:miguser.xml /i:migapp.xml";
+                process.StartInfo.Arguments = StoreLocation.SelectedPath + @" /i:miguser.xml /i:migapp.xml " + addCLM.Text;
                 //process.Start();
             } else
             {
@@ -221,6 +222,11 @@ namespace WindowsFormsApplication1
             SetStoreFolder.Enabled = true;
             Step3Label.Text = "Step 3. Set the folder to the location of the USMT.MIG.";
             Command.Text = USMTFolder.SelectedPath + "\\loadstate.exe ";
+        }
+
+        private void addCLM_TextChanged(object sender, EventArgs e)
+        {
+            //Command.Text += addCLM.Text;
         }
     }
 }

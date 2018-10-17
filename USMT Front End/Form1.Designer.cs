@@ -54,6 +54,9 @@
             this.Step4Label = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
             this.Step5Label = new System.Windows.Forms.Label();
+            this.addCLM = new System.Windows.Forms.TextBox();
+            this.label4 = new System.Windows.Forms.Label();
+            this.label6 = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // StoreLocation
@@ -178,7 +181,8 @@
             // 
             this.Command.Location = new System.Drawing.Point(12, 786);
             this.Command.Name = "Command";
-            this.Command.Size = new System.Drawing.Size(1229, 31);
+            this.Command.ReadOnly = true;
+            this.Command.Size = new System.Drawing.Size(1483, 31);
             this.Command.TabIndex = 10;
             // 
             // USMTFolderPath
@@ -303,11 +307,40 @@
             this.Step5Label.Text = "Step 5. Click Execute to store the user profiles.";
             this.Step5Label.Visible = false;
             // 
+            // addCLM
+            // 
+            this.addCLM.Location = new System.Drawing.Point(20, 873);
+            this.addCLM.Name = "addCLM";
+            this.addCLM.Size = new System.Drawing.Size(778, 31);
+            this.addCLM.TabIndex = 25;
+            this.addCLM.TextChanged += new System.EventHandler(this.addCLM_TextChanged);
+            // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(15, 836);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(366, 25);
+            this.label4.TabIndex = 26;
+            this.label4.Text = "Additional Command Line Arguments";
+            // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(377, 836);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(276, 25);
+            this.label6.TabIndex = 27;
+            this.label6.Text = "(will not be reflected above)";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(12F, 25F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1520, 909);
+            this.ClientSize = new System.Drawing.Size(1520, 950);
+            this.Controls.Add(this.label6);
+            this.Controls.Add(this.label4);
+            this.Controls.Add(this.addCLM);
             this.Controls.Add(this.Step5Label);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.Step4Label);
@@ -369,6 +402,9 @@
         private System.Windows.Forms.Label Step4Label;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Label Step5Label;
+        private System.Windows.Forms.TextBox addCLM;
+        private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.Label label6;
     }
 }
 
